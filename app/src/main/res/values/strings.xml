@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">computer Vision</string>
+    <string name="take_picture">take picture</string>
+    <string name="go">GO</string>
+    <string name="error">Error finding image</string>
+    <string name="imageview_description">The imageview that contains the  picture</string>
+    <string name="saved_message">Image Saved at %1$s</string>
+
+
+</resources>
