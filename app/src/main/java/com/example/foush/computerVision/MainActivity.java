@@ -12,6 +12,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -19,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
@@ -34,6 +36,7 @@ import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
@@ -44,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.fileprovider";
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static Uri photoURI;
     @BindView(R.id.image_view)
     ImageView imageView;
@@ -65,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap mResultsBitmap;
     File photoFile = null;
     private Bitmap theBitmap = null;
+
+    //save the uri of the 3 photos taken
+    String[]photosUriList=new String[3];
+    private static int i=0;
+    private Bitmap tempBitmap;
 
 
 
@@ -123,6 +132,10 @@ public class MainActivity extends AppCompatActivity {
 
                 // Get the path of the temporary file
                 mTempPhotoPath = photoFile.getAbsolutePath();
+                Log.d(TAG, "launchCamera: photo uri uri uri uri uri uri is  "+mTempPhotoPath);
+
+
+                Log.d("this is my array", "arr: " + Arrays.toString(photosUriList));
 
                 // Get the content URI for the image file
                  photoURI = FileProvider.getUriForFile(this,
@@ -203,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         myRectPaint.setStyle(Paint.Style.STROKE);
 
         //create a canvas object for drawing on
-        Bitmap tempBitmap = Bitmap.createBitmap(myBitmap.getWidth(), myBitmap.getHeight(), Bitmap.Config.RGB_565);
+        tempBitmap = Bitmap.createBitmap(myBitmap.getWidth(), myBitmap.getHeight(), Bitmap.Config.RGB_565);
         Canvas tempCanvas = new Canvas(tempBitmap);
         tempCanvas.drawBitmap(myBitmap, 0, 0, null);
 
@@ -234,6 +247,8 @@ public class MainActivity extends AppCompatActivity {
             tempCanvas.drawRoundRect(new RectF(x1, y1, x2, y2), 2, 2, myRectPaint);
         }
         imageView.setImageDrawable(new BitmapDrawable(getResources(),tempBitmap));
+
+
 
 
 
@@ -283,7 +298,14 @@ public class MainActivity extends AppCompatActivity {
                 BitmapUtils.deleteImageFile(this, mTempPhotoPath);
 
                 // Save the image
-                BitmapUtils.saveImage(this, mResultsBitmap);
+                BitmapUtils.saveImage(this, tempBitmap,i);
+                File storageDir = new File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                                + "/computerVision");
+                String savedImgPath=storageDir.getAbsolutePath()+i;
+                photosUriList[i]=savedImgPath+"JPEG_" + ""+i + ".jpg";
+                i++;
+                Log.d("this is my array", "arr: " + Arrays.toString(photosUriList));
 
 
                 break;

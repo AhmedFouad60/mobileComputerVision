@@ -135,17 +135,17 @@ class BitmapUtils {
      * @param image   The image to be saved.
      * @return The path of the saved image.
      */
-    static String saveImage(Context context, Bitmap image) {
+    static String saveImage(Context context, Bitmap image,int i) {
 
         String savedImagePath = null;
 
         // Create the new file in the external storage
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + ".jpg";
+        String imageFileName = "JPEG_" + ""+i + ".jpg";
         File storageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                        + "/Emojify");
+                        + "/computerVision");
         boolean success = true;
         if (!storageDir.exists()) {
             success = storageDir.mkdirs();
