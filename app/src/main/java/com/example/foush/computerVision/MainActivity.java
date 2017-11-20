@@ -1,11 +1,10 @@
 package com.example.foush.computerVision;
 
 import android.Manifest;
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -18,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.SparseArray;
 import android.view.View;
@@ -26,12 +26,15 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.glidebitmappool.GlideBitmapFactory;
+import com.glidebitmappool.GlideBitmapPool;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
     private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.fileprovider";
-    private static Uri photoURI=null;
+    private static Uri photoURI;
     @BindView(R.id.image_view)
     ImageView imageView;
     @BindView(R.id.title_text_view)
@@ -60,6 +63,9 @@ public class MainActivity extends AppCompatActivity {
     private String mTempPhotoPath;
 
     private Bitmap mResultsBitmap;
+    File photoFile = null;
+    private Bitmap theBitmap = null;
+
 
 
     @Override
@@ -67,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        GlideBitmapPool.initialize(10 * 1024 * 1024); // 10mb max memory size
+
 
 
 
@@ -103,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             // Create the temporary File where the photo should go
-            File photoFile = null;
+
             try {
                 photoFile = BitmapUtils.createTempImageFile(this);
             } catch (IOException ex) {
@@ -137,7 +145,13 @@ public class MainActivity extends AppCompatActivity {
 
 
             // Process the image and set it to the TextView
-            processAndSetImage();
+            try {
+                processAndSetImage();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } else {
 
             // Otherwise, delete the temporary image file
@@ -148,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Method for processing the captured image and setting it to the TextView.
      */
-    private void processAndSetImage() {
+    @SuppressLint({"CheckResult", "StaticFieldLeak"})
+    private void processAndSetImage() throws ExecutionException, InterruptedException {
         //Toggle Visibility of the Views
         Gobutton.setVisibility(View.GONE);
         titleTextView.setVisibility(View.GONE);
@@ -157,13 +172,29 @@ public class MainActivity extends AppCompatActivity {
         clearButton.setVisibility(View.VISIBLE);
 
         // Resample the saved image to save memory
-        mResultsBitmap = BitmapUtils.resamplePic(this, mTempPhotoPath);
+       // mResultsBitmap = BitmapUtils.resamplePic(this, mTempPhotoPath);
 
         //Load the Image with it's uri
 
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inMutable=true;
-        Bitmap myBitmap = BitmapFactory.decodeFile(String.valueOf(photoURI),options);
+        Bitmap myBitmap = GlideBitmapFactory.decodeFile(mTempPhotoPath);
+        imageView.setImageBitmap(myBitmap);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+       // BitmapFactory.Options options = new BitmapFactory.Options();
+       // options.inMutable=true;
+      //  Bitmap myBitmap = BitmapFactory.decodeFile(String.valueOf(photoURI),options);
 
         //create a paint object for drawing with
         Paint myRectPaint = new Paint();
@@ -178,16 +209,17 @@ public class MainActivity extends AppCompatActivity {
 
         //create the face detector
         FaceDetector faceDetector = new
-                FaceDetector.Builder(getApplicationContext()).setTrackingEnabled(false)
+               FaceDetector.Builder(getApplicationContext()).setTrackingEnabled(false)
                 .build();
         if(!faceDetector.isOperational()){
             new AlertDialog.Builder(this).setMessage("Could not set up the face detector!").show();
-            return;
+           return;
 
         }
 
         //Detect faces
         //Draw Rectangles on the faces
+
 
         //Detect the Faces
         Frame frame = new Frame.Builder().setBitmap(myBitmap).build();
