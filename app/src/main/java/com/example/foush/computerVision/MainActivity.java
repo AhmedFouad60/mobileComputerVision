@@ -12,7 +12,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
@@ -34,9 +33,12 @@ import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.FaceDetector;
 
+import org.zeroturnaround.zip.ZipUtil;
+
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
@@ -46,7 +48,7 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_STORAGE_PERMISSION = 1;
-    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.fileprovider";
+    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.fileproviderVision";
     private static final String TAG = MainActivity.class.getSimpleName();
     private static Uri photoURI;
     @BindView(R.id.image_view)
@@ -71,10 +73,11 @@ public class MainActivity extends AppCompatActivity {
     private Bitmap theBitmap = null;
 
     //save the uri of the 3 photos taken
-    String[]photosUriList=new String[3];
-    private static int i=0;
+    private static List<String>photosUriList=new ArrayList<String>();
+    private static int count=0;
     private Bitmap tempBitmap;
-
+    private static List<File>filesList=new ArrayList<File>();
+    private static String FoushTest="";
 
 
     @Override
@@ -135,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "launchCamera: photo uri uri uri uri uri uri is  "+mTempPhotoPath);
 
 
-                Log.d("this is my array", "arr: " + Arrays.toString(photosUriList));
 
                 // Get the content URI for the image file
                  photoURI = FileProvider.getUriForFile(this,
@@ -193,22 +195,6 @@ public class MainActivity extends AppCompatActivity {
         imageView.setImageBitmap(myBitmap);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-       // BitmapFactory.Options options = new BitmapFactory.Options();
-       // options.inMutable=true;
-      //  Bitmap myBitmap = BitmapFactory.decodeFile(String.valueOf(photoURI),options);
-
         //create a paint object for drawing with
         Paint myRectPaint = new Paint();
         myRectPaint.setStrokeWidth(5);
@@ -248,21 +234,30 @@ public class MainActivity extends AppCompatActivity {
         }
         imageView.setImageDrawable(new BitmapDrawable(getResources(),tempBitmap));
 
+        /**save the image and get the images path*/
 
-
-
-
-
-
-
+            // Delete the temporary image file
+            BitmapUtils.deleteImageFile(this, mTempPhotoPath);
+            // Save the image
+            String imagPath=BitmapUtils.saveImage(this, tempBitmap);
+            photosUriList.add(imagPath);
+            count++;
+        Log.d(TAG, "processAndSetImage: my array is  "+photosUriList.toString());
 
 
         /**write fuction to cut the only the face with rectangle drawing */
 
 
-
         /**Write function to zip this cropped photo**/
 
+
+
+        if(count==3) {
+            ZipUtil.pack(new File(""+BitmapUtils.storageDir), new File(""+BitmapUtils.storageDir+".zip"));
+            ZipUtil.unexplode(new File(""+BitmapUtils.storageDir+".zip"));
+
+
+        }
 
 
         /*** write function to send the ziped file to the server [moustafa]*/
@@ -298,17 +293,15 @@ public class MainActivity extends AppCompatActivity {
                 BitmapUtils.deleteImageFile(this, mTempPhotoPath);
 
                 // Save the image
-                BitmapUtils.saveImage(this, tempBitmap,i);
-                File storageDir = new File(
-                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                                + "/computerVision");
-                String savedImgPath=storageDir.getAbsolutePath()+i;
-                photosUriList[i]=savedImgPath+"JPEG_" + ""+i + ".jpg";
-                i++;
-                Log.d("this is my array", "arr: " + Arrays.toString(photosUriList));
+                BitmapUtils.saveImage(this, tempBitmap);
+
 
 
                 break;
         }
     }
+
+
+
+
 }

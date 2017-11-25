@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import org.zeroturnaround.zip.ZipUtil;
+
+import java.io.File;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -93,6 +97,10 @@ public class Main2Activity extends AppCompatActivity {
                 Intent pic2 = new Intent(Main2Activity.this, MainActivity.class);
                 startActivityForResult(pic2, PIC2);
                 break;
+            case R.id.zip:
+                ZipUtil.pack(new File("/storage/emulated/0/Pictures/computerVision"), new File("/storage/emulated/0/Pictures/computerVision.zip"));
+                ZipUtil.unexplode(new File("/storage/emulated/0/Pictures/computerVision.zip"));
+
         }
     }
 }

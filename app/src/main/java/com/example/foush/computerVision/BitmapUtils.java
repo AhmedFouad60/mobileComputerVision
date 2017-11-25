@@ -36,7 +36,8 @@ import java.util.Locale;
 
 class BitmapUtils {
 
-    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.fileprovider";
+    public static File storageDir;
+    private static final String FILE_PROVIDER_AUTHORITY = "com.example.android.fileproviderVision";
 
 
     /**
@@ -83,7 +84,7 @@ class BitmapUtils {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = context.getExternalCacheDir();
+         storageDir = context.getExternalCacheDir();
 
         return File.createTempFile(
                 imageFileName,  /* prefix */
@@ -135,15 +136,15 @@ class BitmapUtils {
      * @param image   The image to be saved.
      * @return The path of the saved image.
      */
-    static String saveImage(Context context, Bitmap image,int i) {
+    static String saveImage(Context context, Bitmap image) {
 
         String savedImagePath = null;
 
         // Create the new file in the external storage
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
                 Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + ""+i + ".jpg";
-        File storageDir = new File(
+        String imageFileName = "JPEG_" + timeStamp + ".jpg";
+        storageDir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                         + "/computerVision");
         boolean success = true;

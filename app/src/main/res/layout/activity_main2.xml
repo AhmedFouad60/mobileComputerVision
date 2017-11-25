@@ -13,6 +13,7 @@
         android:padding="50dp"
         />
 
+
     <TableRow android:layout_weight="1" >
 
         <Button
@@ -48,5 +49,13 @@
         android:text="upload Now"
         android:textAppearance="?android:textAppearanceMedium"
         />
+    <Button
+        android:id="@+id/zip"
+        android:padding="15dp"
+        android:visibility="visible"
+        android:text="zip now"
+        android:textAppearance="?android:textAppearanceMedium"
+        />
+
 
 </TableLayout>
